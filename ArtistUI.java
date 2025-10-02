@@ -19,7 +19,7 @@ import Option.RapUI;
 import Option.USUKUI;
 import Option.OtherUI;
 import Default.LoginUI;
-
+//địt mẹ mày
 public class ArtistUI {
     private String artistName;
 
@@ -56,4 +56,5 @@ public class ArtistUI {
 
         return new Scene(layout, 800, 600);
     }
+
 }
