@@ -1,33 +1,19 @@
 package Default;
 
-import javafx.application.Application;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane; 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.geometry.Pos;
-import javafx.geometry.Insets;
-import javafx.scene.control.Label;
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
-import javafx.scene.control.Button;
-
-// 👉 Import các UI riêng cho từng thể loại
-import Options.VpopUI;
-import Options.RockUI;
-import Options.RapUI;
-import Options.USUKUI;
-import Options.OtherUI;
-import Default.LoginUI;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
 public class LoginUI {
     
     public Scene getScene(Stage stage) {
         // === VBox chứa form đăng nhập ===
         VBox layout = new VBox(10);
-        layout.setPrefSize(400, 500);
+        layout.setPrefSize(400, 550);
         layout.setPadding(new Insets(30));
         layout.setStyle("""
         -fx-background-color: linear-gradient(
@@ -131,6 +117,6 @@ public class LoginUI {
         layout.setMaxHeight(Region.USE_PREF_SIZE);
 
         // ✅ Trả về Scene chính
-        return new Scene(loginSite, 800, 600);
+        return new Scene(loginSite, 1120, 700);
     }
 }
