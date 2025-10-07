@@ -1,4 +1,0 @@
-bcnn_ucln
-codeoop.ptich_thua_so_nt
-ptich_thua_so_nt
-ucln_bcnn

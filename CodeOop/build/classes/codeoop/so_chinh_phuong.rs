@@ -1,2 +1,0 @@
-so_cp
-so_chinh_phuong
