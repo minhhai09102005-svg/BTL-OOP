@@ -205,8 +205,8 @@ public class UserUI {
                 repeating1[0] = !repeating1[0];
                 btnRepeat.setTextFill(repeating1[0] ? Color.DODGERBLUE : Color.WHITE);
             });
-            
-            // nút volume
+
+                         // nút volume
             Button volButton = new Button("🔊");
 
             // bỏ viền & nền, tắt focus ring
@@ -225,13 +225,19 @@ public class UserUI {
             );
 
             // toggle icon khi bấm
-            final boolean[] notMute = { false };
+            final boolean[] Mute = { false };
             volButton.setOnAction(e -> {
-                notMute[0] = !notMute[0];
-                volButton.setText(notMute[0] ? "🔇" : "🔊");
-                //TODO: Backend xử lý mute nhạc ở đây
+                Mute[0] = !Mute[0];
+                if (Mute[0]) {
+                    volButton.setText("🔇");
+                    // TODO: Backend xử lý mute nhạc (bật mute)
+                } else {
+                    volButton.setText("🔊");
+                    // TODO: Backend xử lý mute nhạc (tắt mute)
+                }
             });
 
+        
             Slider vol = new Slider(0, 1, 0.8); // 0..1
             vol.setPrefWidth(110);
             vol.setMaxWidth(110);
@@ -242,9 +248,21 @@ public class UserUI {
             // style nhẹ, không viền
             vol.setStyle("-fx-control-inner-background: #6B7280; -fx-base: #D1D5DB;");
 
-            // (tuỳ chọn) gửi sự kiện volume ra backend
+            //CHỨC NĂNG CỦA THANH VOLUME
             vol.valueProperty().addListener((o, ov, nv) -> {
-                // playerApi.setVolume(nv.doubleValue()); // nếu có backend
+                double v = nv.doubleValue();
+            
+                // auto đổi icon theo giá trị slider
+                if (v <= 0.0001) {          // ngưỡng ~0
+                    Mute[0] = true;
+                    volButton.setText("🔇");
+                } else {
+                    Mute[0] = false;
+                    volButton.setText("🔊");
+                }
+            
+                // TODO: gọi backend nếu có
+                // playerApi.setVolume(v);
             });
 
            HBox rightBox = new HBox(12, volButton, vol, btnLike, btnRepeat);
