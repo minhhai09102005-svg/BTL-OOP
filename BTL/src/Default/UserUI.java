@@ -1,6 +1,5 @@
 package Default;
 
-import javafx.application.Application;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane; 
 import javafx.scene.layout.VBox;
@@ -11,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Priority; 
 
 // 👉 Import các UI riêng cho từng thể loại
 import Options.VpopUI;
@@ -18,171 +18,246 @@ import Options.RockUI;
 import Options.RapUI;
 import Options.USUKUI;
 import Options.OtherUI;
+import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 public class UserUI {
 
     public Scene getScene(Stage primaryStage) {
         // ===== Block 1 =====
         VBox option_menu = new VBox();
-        option_menu.setPrefSize(300, 400); 
+        option_menu.setPrefSize(200, 400); 
         Label label_1 = new Label("MusicPlayer");
         label_1.setStyle("-fx-font-size: 20px; -fx-text-fill: white;-fx-font-weight: bold;");
         label_1.setTranslateX(30);
         option_menu.getChildren().add(label_1);
         option_menu.setStyle("-fx-background-color: #4A4A4A;-fx-background-radius: 10;");
+        option_menu.setSpacing(8);
+        option_menu.setPadding(new Insets(12));
 
-        // 👉 Đổi Pane thành StackPane
+        // Vùng đen hiển thị nội dung
         StackPane mainDisplay = new StackPane();
         mainDisplay.setPrefSize(900, 400);
         mainDisplay.setStyle("-fx-background-color: #010101;");
+        
+        // nội dung mặc định của mainDisplay (tạo 1 lần)
+        StackPane defaultContent = new StackPane(new Label("Welcome"));
+        defaultContent.setStyle("-fx-background-color: #010101;");
+        defaultContent.prefWidthProperty().bind(mainDisplay.widthProperty());
+        defaultContent.prefHeightProperty().bind(mainDisplay.heightProperty());
+        mainDisplay.getChildren().setAll(defaultContent);
 
+
+        // Nút Home (sidebar)
+        Button btnHome = new Button("Home");
+        btnHome.setPrefSize(160, 50);
+        btnHome.setMaxWidth(Double.MAX_VALUE);
+        btnHome.setAlignment(Pos.CENTER_LEFT);
+        btnHome.setStyle(
+            "-fx-background-color: #2F3945;" +
+            "-fx-background-radius: 6px;" +
+            "-fx-text-fill: #FEFEFE;" +
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: 700;" +
+            "-fx-cursor: hand;"
+        );
+        // Hover nhẹ
+        btnHome.setOnMouseEntered(e -> btnHome.setStyle(
+            "-fx-background-color: #394656; -fx-background-radius: 6px;" +
+            "-fx-text-fill: #FFFFFF; -fx-font-size: 16px; -fx-font-weight: 700; -fx-cursor: hand;"
+        ));
+        btnHome.setOnMouseExited(e -> btnHome.setStyle(
+            "-fx-background-color: #2F3945; -fx-background-radius: 6px;" +
+            "-fx-text-fill: #FEFEFE; -fx-font-size: 16px; -fx-font-weight: 700; -fx-cursor: hand;"
+        ));
+        
+        btnHome.setOnAction(e -> {
+            mainDisplay.getChildren().setAll(defaultContent); // quay về nội dung mặc định
+        });
+
+        
+        option_menu.getChildren().add(btnHome);
+
+        // block_1: sidebar + mainDisplay  <<< FIX: thêm mainDisplay vào đây
         HBox block_1 = new HBox(10);
         block_1.getChildren().addAll(option_menu, mainDisplay);
         block_1.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(mainDisplay, Priority.ALWAYS);
+        
+        // ===== Block 3: Player bar kiểu Spotify =====
+           HBox playerBar = new HBox();
+           playerBar.setAlignment(Pos.CENTER_LEFT);
+           playerBar.setSpacing(16);
+           playerBar.setPadding(new Insets(10, 14, 10, 14));
+           playerBar.setPrefHeight(70);
+           playerBar.setMinHeight(70);
+           playerBar.setMaxHeight(70);
+           playerBar.setStyle("-fx-background-color: #1E1E1E; -fx-background-radius: 10;");
 
-        // ===== Block 2 =====
-        VBox top_your_genres = new VBox(5); 
-        top_your_genres.setPrefSize(350, 200);
-        top_your_genres.setPadding(new Insets(10));
-        top_your_genres.setStyle("-fx-background-color: #4A4A4A;-fx-background-radius: 10;");
+           // ----- CỤM TRÁI: bìa + tiêu đề + nghệ sĩ -----
+           ImageView cover = new ImageView();
+           try {
+               cover.setImage(new Image(getClass().getResource("/image/9e0f8784ffebf6865c83c5e526274f31_1465465806.jpg").toExternalForm())); // đổi tên ảnh của bạn
+           } catch (Exception ignore) { /* nếu thiếu ảnh thì để trống */ }
+           cover.setFitWidth(48);
+           cover.setFitHeight(48);
+           // bo góc cho bìa
+           Rectangle clip = new Rectangle(48, 48);
+           clip.setArcWidth(10); clip.setArcHeight(10);
+           cover.setClip(clip);
 
-        Label genreTitle = new Label("Your Genres");
-        genreTitle.setStyle("-fx-font-size: 18px; -fx-text-fill: white; -fx-font-weight: bold;");
+           Label titleLbl  = new Label("Be Cool");
+           titleLbl.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 800;");
+           Label artistLbl = new Label("Ngọt");
+           artistLbl.setStyle("-fx-text-fill: #B3B3B3; -fx-font-size: 12px; -fx-font-weight: 600;");
+           VBox metaBox = new VBox(2, titleLbl, artistLbl);
 
-        VBox genreContainer = new VBox(3);
+           HBox leftBox = new HBox(10, cover, metaBox);
+           leftBox.setAlignment(Pos.CENTER_LEFT);
 
-        // Hàng 1
-        HBox genreRow_1 = new HBox(3);
-        Button genreChoice_1 = new Button("VPop");
-        genreChoice_1.setPrefSize(160,50);
-        genreChoice_1.setStyle(
-            "-fx-background-color: #C60DD3;" +
-            "-fx-background-radius: 5px;" +
-            "-fx-text-fill: #FEFEFE;" +
-            "-fx-font-size: 20px;" +
-            "-fx-font-weight: 600;" +
-            "-fx-cursor: hand;"
-        );
-        genreChoice_1.setOnAction(e -> {
-            mainDisplay.getChildren().clear();
-            VpopUI vboxUI = new VpopUI();
-            vboxUI.prefWidthProperty().bind(mainDisplay.widthProperty());
-            vboxUI.prefHeightProperty().bind(mainDisplay.heightProperty());
-            mainDisplay.getChildren().add(vboxUI);
-        });
+           // ----- CỤM GIỮA: nút điều khiển + thanh thời gian -----
+           Button btnPrev = new Button("⏮");
+           
+           Button btnPlay = new Button("⏵"); 
+              // toggle icon khi bấm
+             final boolean[] isPlaying = { false };
+             btnPlay.setOnAction(e -> {
+                 isPlaying[0] = !isPlaying[0];
+                 btnPlay.setText(isPlaying[0] ? "⏸" : "⏵");
+                 // TODO: nếu có backend thì gọi play()/pause() ở đây
+             });
+           
+           
+           Button btnNext = new Button("⏭");
 
-        Button genreChoice_2 = new Button("Rock");
-        genreChoice_2.setPrefSize(160,50);
-        genreChoice_2.setStyle(
-            "-fx-background-color: #C11E1F;" +
-            "-fx-background-radius: 5px;" +
-            "-fx-text-fill: #FEFEFE;" +
-            "-fx-font-size: 20px;" +
-            "-fx-font-weight: 600;" +
-            "-fx-cursor: hand;"
-        );
-        genreChoice_2.setOnAction(e -> {
-            mainDisplay.getChildren().clear();
-            RockUI rockUI = new RockUI();
-            rockUI.prefWidthProperty().bind(mainDisplay.widthProperty());
-            rockUI.prefHeightProperty().bind(mainDisplay.heightProperty());
-            mainDisplay.getChildren().add(rockUI);
-        });
-        genreRow_1.getChildren().addAll(genreChoice_1, genreChoice_2);
+           for (Button b : new Button[]{btnPrev, btnPlay, btnNext}) {
+               b.setStyle("-fx-background-color: transparent; -fx-text-fill: white;"
+                       + "-fx-font-size: 18px; -fx-font-weight: 700; -fx-cursor: hand;"
+                       + "-fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
+           }
 
-        // Hàng 2
-        HBox genreRow_2 = new HBox(3);
-        Button genreChoice_3 = new Button("Rap");
-        genreChoice_3.setPrefSize(160,50);
-        genreChoice_3.setStyle(
-            "-fx-background-color: #227E28;" +
-            "-fx-background-radius: 5px;" +
-            "-fx-text-fill: #FEFEFE;" +
-            "-fx-font-size: 20px;" +
-            "-fx-font-weight: 600;" +
-            "-fx-cursor: hand;"
-        );
-        genreChoice_3.setOnAction(e -> {
-            mainDisplay.getChildren().clear();
-            RapUI rapUI = new RapUI();
-            rapUI.prefWidthProperty().bind(mainDisplay.widthProperty());
-            rapUI.prefHeightProperty().bind(mainDisplay.heightProperty());
-            mainDisplay.getChildren().add(rapUI);
-        });
+           HBox controlsRow = new HBox(20, btnPrev, btnPlay, btnNext);
+           controlsRow.setAlignment(Pos.CENTER);
 
-        Button genreChoice_4 = new Button("US-UK");
-        genreChoice_4.setPrefSize(160,50);
-        genreChoice_4.setStyle(
-            "-fx-background-color: #7E28E2;" +  
-            "-fx-background-radius: 5px;" +    
-            "-fx-text-fill: #FEFEFE;" +
-            "-fx-font-size: 20px;" +
-            "-fx-font-weight: 600;" +
-            "-fx-cursor: hand;"
-        );
-        genreChoice_4.setOnAction(e -> {
-            mainDisplay.getChildren().clear();
-            USUKUI usukUI = new USUKUI();
-            usukUI.prefWidthProperty().bind(mainDisplay.widthProperty());
-            usukUI.prefHeightProperty().bind(mainDisplay.heightProperty());
-            mainDisplay.getChildren().add(usukUI);
-        });
-        genreRow_2.getChildren().addAll(genreChoice_3, genreChoice_4);
+           // thời gian + slider
+           int totalSeconds = 205; // ví dụ 3:25, thay bằng duration thật của bài
+           Label lblCurrent = new Label("0:00");
+           lblCurrent.setStyle("-fx-text-fill: #C9D1D9; -fx-font-size: 12px; -fx-font-weight: 700;");
+           Label lblTotal   = new Label(String.format("%d:%02d", totalSeconds/60, totalSeconds%60));
+           lblTotal.setStyle("-fx-text-fill: #C9D1D9; -fx-font-size: 12px; -fx-font-weight: 700;");
 
-        // Hàng 3
-        HBox genreRow_3 = new HBox(3);
-        Button genreChoice_5 = new Button("Other...");
-        genreChoice_5.setPrefSize(160,50);
-        genreChoice_5.setStyle(
-            "-fx-background-color: #37817A;" +
-            "-fx-background-radius: 5px;" +
-            "-fx-text-fill: #FEFEFE;" +
-            "-fx-font-size: 20px;" +
-            "-fx-font-weight: 600;" +
-            "-fx-cursor: hand;"
-        );
-        genreChoice_5.setOnAction(e -> {
-            mainDisplay.getChildren().clear();
-            OtherUI otherUI = new OtherUI();
-            otherUI.prefWidthProperty().bind(mainDisplay.widthProperty());
-            otherUI.prefHeightProperty().bind(mainDisplay.heightProperty());
-            mainDisplay.getChildren().add(otherUI);
-        });
-        genreRow_3.getChildren().add(genreChoice_5);
+           Slider progress = new Slider(0, totalSeconds, 0);
+           progress.setBlockIncrement(1);
+           progress.setShowTickMarks(false);
+           progress.setShowTickLabels(false);
+           progress.setMaxWidth(Double.MAX_VALUE);
+           HBox.setHgrow(progress, Priority.ALWAYS);
+           // style đơn giản cho slider (màu sáng)
+           progress.setStyle(
+               "-fx-control-inner-background: #6B7280;"
+             + "-fx-base: #D1D5DB;"
+           );
 
-        genreContainer.getChildren().addAll(genreRow_1, genreRow_2, genreRow_3);
-        top_your_genres.getChildren().addAll(genreTitle, genreContainer);
+           // hàng slider
+           HBox timeRow = new HBox(10, lblCurrent, progress, lblTotal);
+           timeRow.setAlignment(Pos.CENTER);
 
-        // News section
-        VBox news = new VBox();
-        news.setPrefSize(425, 200);
-        Label label_3 = new Label("New Music");
-        label_3.setStyle("-fx-font-size: 20;-fx-text-fill: white;-fx-font-weight :bold");
-        label_3.setTranslateX(150);
-        news.getChildren().add(label_3);
-        news.setStyle("-fx-background-color: #4A4A4A;-fx-background-radius: 10;");
+           // gộp giữa
+           VBox centerBox = new VBox(6, controlsRow, timeRow);
+           centerBox.setAlignment(Pos.CENTER);
+           HBox.setHgrow(centerBox, Priority.ALWAYS);   // giữa chiếm rộng để các cụm trái/phải co gọn
 
-        // Music list section
-        Pane musicList = new Pane();
-        musicList.setPrefSize(425, 200);
-        musicList.setStyle("-fx-background-color: #4A4A4A;-fx-background-radius: 10;");
+           // ----- CỤM PHẢI: chỉ ♥ và ↻ -----
+           Button btnLike = new Button();
+           btnLike.setText("♥");
+            btnLike.setTextFill(Color.WHITE);
+            btnLike.setBackground(Background.EMPTY);              // bỏ nền
+            btnLike.setBorder(Border.EMPTY);                      // bỏ viền
+            btnLike.setFocusTraversable(false);                   // tắt viền focus
+            btnLike.setStyle("-fx-background-color: transparent;"
+                    + "-fx-font-size: 16px; -fx-font-weight: 700; "
+                    + "-fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
+            final boolean[] liked = {false};
+            btnLike.setOnAction(e -> {
+                liked[0] = !liked[0];
+                btnLike.setTextFill(liked[0] ? Color.RED : Color.WHITE);
+            });
+            
+            
+           Button btnRepeat = new Button();
+           // ↻ trắng ↔ xanh dương
+            btnRepeat.setText("↻");
+            btnRepeat.setTextFill(Color.WHITE);
+            btnRepeat.setBackground(Background.EMPTY);
+            btnRepeat.setBorder(Border.EMPTY);
+            btnRepeat.setFocusTraversable(false);
+            btnRepeat.setStyle("-fx-background-color: transparent;"
+                    + "-fx-font-size: 16px; -fx-font-weight: 700; "
+                    + "-fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
+            final boolean[] repeating1 = {false};
+            btnRepeat.setOnAction(e -> {
+                repeating1[0] = !repeating1[0];
+                btnRepeat.setTextFill(repeating1[0] ? Color.DODGERBLUE : Color.WHITE);
+            });
+            
+            // nút volume
+            Button volButton = new Button("🔊");
 
-        HBox block_2 = new HBox(5);
-        block_2.getChildren().addAll(top_your_genres, news, musicList);
+            // bỏ viền & nền, tắt focus ring
+            volButton.setBackground(Background.EMPTY);
+            volButton.setBorder(Border.EMPTY);
+            volButton.setFocusTraversable(false);
+            volButton.setStyle(
+                "-fx-background-color: transparent;" +
+                "-fx-background-insets: 0;" +
+                "-fx-background-radius: 0;" +
+                "-fx-border-color: transparent;" +
+                "-fx-focus-color: transparent;" +
+                "-fx-faint-focus-color: transparent;" +
+                "-fx-padding: 0;" +                 // gọn icon
+                "-fx-text-fill: white; -fx-font-size: 14px;"
+            );
 
-        // ===== Block 3 =====
-        Pane musicDisplay = new Pane();
-        musicDisplay.setPrefSize(1200, 70);
-        musicDisplay.setMinHeight(70);
-        musicDisplay.setMaxHeight(70);
-        musicDisplay.setStyle("-fx-background-color: #4A4A4A;-fx-background-radius: 10;");
+            // toggle icon khi bấm
+            final boolean[] notMute = { false };
+            volButton.setOnAction(e -> {
+                notMute[0] = !notMute[0];
+                volButton.setText(notMute[0] ? "🔇" : "🔊");
+                //TODO: Backend xử lý mute nhạc ở đây
+            });
 
-        HBox block_3 = new HBox();
-        block_3.getChildren().addAll(musicDisplay);
+            Slider vol = new Slider(0, 1, 0.8); // 0..1
+            vol.setPrefWidth(110);
+            vol.setMaxWidth(110);
+            vol.setMinWidth(80);
+            vol.setFocusTraversable(false);
+            vol.setShowTickMarks(false);
+            vol.setShowTickLabels(false);
+            // style nhẹ, không viền
+            vol.setStyle("-fx-control-inner-background: #6B7280; -fx-base: #D1D5DB;");
+
+            // (tuỳ chọn) gửi sự kiện volume ra backend
+            vol.valueProperty().addListener((o, ov, nv) -> {
+                // playerApi.setVolume(nv.doubleValue()); // nếu có backend
+            });
+
+           HBox rightBox = new HBox(12, volButton, vol, btnLike, btnRepeat);
+           rightBox.setAlignment(Pos.CENTER_RIGHT);
+
+           // ----- LẮP RÁP 3 CỤM: trái | giữa | phải -----
+           playerBar.getChildren().addAll(leftBox, centerBox, rightBox);
+           HBox block_3 = new HBox(playerBar);
+
 
         // ===== Full layout =====
         VBox FullDisplay = new VBox(10);
-        FullDisplay.getChildren().addAll(block_1, block_2, block_3);
+        FullDisplay.getChildren().addAll(block_1, block_3);
         FullDisplay.setAlignment(Pos.CENTER);
         FullDisplay.setPadding(new Insets(5, 5, 5, 5));
         FullDisplay.setStyle("-fx-background-color: #010101;");
@@ -193,33 +268,19 @@ public class UserUI {
         // ===== Resize logic =====
         scene.widthProperty().addListener((obs, oldVal, newVal) -> {
             double width = newVal.doubleValue();
-
-            double optionMenuWidth = (primaryStage.isMaximized() || primaryStage.isFullScreen()) ? 400 : 300;
+            double optionMenuWidth = (primaryStage.isMaximized() || primaryStage.isFullScreen()) ? 300 : 250;
             option_menu.setPrefWidth(optionMenuWidth);
-
-            mainDisplay.setPrefWidth(width - optionMenuWidth - 40);
-
-            double block2Width = width - 20;
-            double eachWidth = block2Width / 3.0;
-            top_your_genres.setPrefWidth(eachWidth);
-            news.setPrefWidth(eachWidth);
-            musicList.setPrefWidth(eachWidth);
-            musicDisplay.setPrefWidth(block2Width);
+            playerBar.setPrefWidth(width - 20); // thanh phát nhạc full rộng (trừ padding)
         });
 
         scene.heightProperty().addListener((obs, oldVal, newVal) -> {
             double height = newVal.doubleValue();
-            double optionMenuHeight = height * 0.6;
-            option_menu.setPrefHeight(optionMenuHeight);
-            double remainingHeight = height - optionMenuHeight - 100;
-            double eachHeight = remainingHeight / 3.0;
-            top_your_genres.setPrefHeight(eachHeight);
-            news.setPrefHeight(eachHeight);
-            musicList.setPrefHeight(eachHeight);
-
-            musicDisplay.setPrefHeight(70);
+            double optionMenuHeight = height - 90; // chừa khoảng cho thanh phát + padding
+            option_menu.setPrefHeight(Math.max(optionMenuHeight, 200)); // đảm bảo không quá nhỏ
+            playerBar.setPrefHeight(70);
         });
 
         return scene;
-    }
-}
+    }  // <--- đóng method
+
+}  // <--- đóng class
