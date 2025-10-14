@@ -1,5 +1,3 @@
-package Default;
-
 import javafx.application.Application;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane; 
@@ -13,13 +11,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.control.Button;
 
 // 👉 Import các UI riêng cho từng thể loại
-import Options.VpopUI;
-import Options.RockUI;
-import Options.RapUI;
-import Options.USUKUI;
-import Options.OtherUI;
+import Option.VpopUI;
+import Option.RockUI;
+import Option.RapUI;
+import Option.USUKUI;
+import Option.OtherUI;
+import Default.UserUI;
+import Default.ArtistUI;
 import Default.LoginUI;
-
 public class Main extends Application {
 
     @Override
