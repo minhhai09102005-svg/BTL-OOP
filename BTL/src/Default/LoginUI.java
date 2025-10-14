@@ -4,81 +4,97 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.layout.Region;
+import java.net.URL; // <-- thêm import này để dùng URL
+
 public class LoginUI {
-    
     public Scene getScene(Stage stage) {
         // === VBox chứa form đăng nhập ===
         VBox layout = new VBox(10);
-        layout.setPrefSize(400, 550);
+        layout.setPrefSize(400, 500);
         layout.setPadding(new Insets(30));
         layout.setStyle("""
-        -fx-background-color: linear-gradient(
-        from 0% 0% to 0% 100%,
-        #2c2c2c 0%,
-        #282828 20%,
-        #252525 40%,
-        #232323 60%,
-        #202020 80%,
-        #1e1e1e 100%
-        );
-        -fx-background-radius: 15;
+        -fx-background-color: rgba(255,255,255,0.12);
+        -fx-background-radius: 18;
+        -fx-border-color: rgba(255,255,255,0.30);
+        -fx-border-width: 1;
+        -fx-border-radius: 18;
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 36, 0.2, 0, 12);
         """);
 
-        Label lbl = new Label("WELCOME BACK!");
+
+        Label lbl = new Label("Login");
         lbl.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold;");
-        lbl.setAlignment(Pos.CENTER);                 // căn giữa text bên trong Label
+        lbl.setAlignment(Pos.CENTER);
         lbl.setMaxWidth(Double.MAX_VALUE);
+
         TextField txtUser = new TextField();
-        
-        Label userName = new Label("username");
-        userName.setStyle("-fx-font-size: 18px;"+
-                          "-fx-text-fill: #9E9E9E; ");
-        
-        txtUser.setStyle("-fx-font-size: 22px;"+ 
-                     "-fx-text-fill: white;"+ 
-                     "-fx-font-weight: bold;"+
-                     "-fx-background-color: transparent;"+
-                     "-fx-border-color: transparent transparent white transparent;");
+        Label userName = new Label("Username");
+        userName.setStyle("""
+            -fx-font-size: 20px;
+            -fx-text-fill: white;
+        """);
 
-        Label userPass = new Label("password");
-        userPass.setStyle("-fx-font-size: 18px;"+
-                          "-fx-text-fill: #9E9E9E;");
-        
+        // Ô nhập chỉ có gạch dưới
+        txtUser.setStyle("""
+            -fx-font-size: 22px;
+            -fx-text-fill: white;
+            -fx-font-weight: bold;
+            -fx-background-color: transparent;
+            -fx-border-color: transparent transparent white transparent;
+            -fx-border-width: 0 0 1.5 0;
+            -fx-focus-color: transparent;
+            -fx-faint-focus-color: transparent;
+            -fx-prompt-text-fill: #BDBDBD;
+        """);
+
+        Label userPass = new Label("Password");
+        userPass.setStyle("""
+            -fx-font-size: 20px;
+            -fx-text-fill: white;
+        """);
+
         PasswordField txtPass = new PasswordField();
-        txtPass.setStyle("-fx-font-size: 22px;"+ 
-                     "-fx-text-fill: white;"+ 
-                     "-fx-font-weight: bold;"+
-                     "-fx-background-color: transparent;"+
-                     "-fx-border-color: transparent transparent white transparent;");
+        txtPass.setStyle("""
+            -fx-font-size: 22px;
+            -fx-text-fill: white;
+            -fx-font-weight: bold;
+            -fx-background-color: transparent;
+            -fx-border-color: transparent transparent white transparent;
+            -fx-border-width: 0 0 1.5 0;
+            -fx-focus-color: transparent;
+            -fx-faint-focus-color: transparent;
+            -fx-prompt-text-fill: #BDBDBD;
+        """);
 
-        Button btnLogin = new Button("Log in");
-        Button btnRegister = new Button("Register");
-        btnLogin.setStyle("-fx-background-color :transparent;"+
-                          "-fx-text-fill: white;"+
-                          "-fx-font-size: 18px;"+
-                          "-fx-font-weight: 700;"+
-                          "-fx-border-color: transparent transparent transparent transparent;"+
-                          "-fx-cursor :hand;");
+        Button btnLogin = new Button("Đăng nhập");
+        btnLogin.setStyle("""
+            -fx-background-color: transparent;    /* nền trong suốt */
+            -fx-text-fill: white;                 /* chữ trắng */
+            -fx-font-size: 18px;                  /* cỡ chữ vừa phải */
+            -fx-font-weight: bold;                /* chữ đậm */
+            -fx-padding: 10 0 0 0;               /* đệm trên dưới */
+            -fx-cursor : hand;
+        """);
+        Button btnRegister = new Button("Đăng ký");
+        btnRegister.setStyle("""
+            -fx-background-color: transparent;    /* nền trong suốt */
+            -fx-text-fill: white;                 /* chữ trắng */
+            -fx-font-size: 18px;                  /* cỡ chữ vừa phải */
+            -fx-font-weight: bold;                /* chữ đậm */
+            -fx-padding: 10 0 0 0;               /* đệm trên dưới */
+            -fx-cursor : hand;
+        """);
         btnLogin.setAlignment(Pos.CENTER);
         btnLogin.setMaxWidth(Double.MAX_VALUE);
-        btnLogin.setPadding(new Insets(15,0,0,0));
-        btnRegister.setStyle("-fx-background-color :transparent;"+
-                          "-fx-text-fill: white;"+
-                          "-fx-font-size: 18px;"+
-                          "-fx-font-weight: 700;"+
-                          "-fx-border-color: transparent transparent transparent transparent;"+
-                          "-fx-cursor :hand;");
         btnRegister.setAlignment(Pos.CENTER);
         btnRegister.setMaxWidth(Double.MAX_VALUE);
-        btnRegister.setPadding(new Insets(15,0,0,0));
-        
+
         Label lblMessage = new Label();
         lblMessage.setStyle("-fx-text-fill: red;");
-        
+
         // 👉 Xử lý khi bấm nút đăng nhập
         btnLogin.setOnAction(e -> {
             String username = txtUser.getText().trim();
@@ -102,21 +118,38 @@ public class LoginUI {
         });
 
         // Thêm tất cả phần tử vào VBox (form)
-        layout.getChildren().addAll(lbl,userName, txtUser,userPass, txtPass, btnLogin, btnRegister, lblMessage);
+        layout.getChildren().addAll(
+            lbl,
+            userName, txtUser,
+            userPass, txtPass,
+            btnLogin, btnRegister,
+            lblMessage
+        );
 
-        // === VBox nền chính (thay StackPane) ===
+        // === VBox nền chính ===
         VBox loginSite = new VBox();
-        loginSite.setAlignment(Pos.CENTER); // ✅ căn giữa form trong VBox
-        loginSite.setPadding(new Insets(50)); // ✅ tạo khoảng trống xung quanh
+        loginSite.setAlignment(Pos.CENTER);
+        loginSite.setPadding(new Insets(50));
+
+        // ✅ Sửa cách ghép URL vào text block
+        URL res = getClass().getResource("/image/photo1.png");
+        String url = (res != null) ? res.toExternalForm() : "";
+
         loginSite.setStyle("""
-            -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #0D1A2A, #325A8D);
-        """);
+            -fx-background-image: url('%s');
+            -fx-background-size: cover;
+            -fx-background-position: center center;
+            -fx-background-repeat: no-repeat;
+            """.formatted(url));
+
+        // ✅ Bổ sung: thêm form vào loginSite
         loginSite.getChildren().add(layout);
-        loginSite.setFillWidth(false);                 // 1) VBox cha không kéo giãn width của con
-        layout.setMaxWidth(Region.USE_PREF_SIZE);      // 2) khóa maxWidth = pref (400)
+
+        // Giữ kích thước form, tránh kéo giãn
+        loginSite.setFillWidth(false);
+        layout.setMaxWidth(Region.USE_PREF_SIZE);
         layout.setMaxHeight(Region.USE_PREF_SIZE);
 
-        // ✅ Trả về Scene chính
-        return new Scene(loginSite, 1120, 700);
+        return new Scene(loginSite, 900, 700);
     }
 }
