@@ -22,7 +22,7 @@ public class MainDisplay extends StackPane {
         defaultContent.prefWidthProperty().bind(widthProperty());
         defaultContent.prefHeightProperty().bind(heightProperty());
 
-        // 👇 thay vì hiển thị defaultContent, hiển thị HomeUI mặc định
+        // Hiển thị HomeUI mặc định
         HomeUI home = new HomeUI();
         show(bindInto(home));
         // getChildren().setAll(defaultContent); // (giữ lại nếu muốn fallback)
@@ -58,3 +58,4 @@ public class MainDisplay extends StackPane {
         return view;
     }
 }
+
