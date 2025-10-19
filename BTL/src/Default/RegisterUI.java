@@ -4,7 +4,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -89,32 +88,6 @@ public class RegisterUI {
             -fx-prompt-text-fill: #BDBDBD;
         """);
 
-        // === Phần chọn loại tài khoản (Register as: User / Artist) ===
-        Label roleLabel = new Label("Register as:");
-        roleLabel.setStyle("-fx-font-size: 20px; -fx-text-fill: white;");
-
-        // Tạo nhóm radio (chỉ chọn được 1 trong 2)
-        ToggleGroup roleGroup = new ToggleGroup();
-
-        RadioButton rbUser = new RadioButton("User");
-        RadioButton rbArtist = new RadioButton("Artist");
-
-        rbUser.setToggleGroup(roleGroup);
-        rbArtist.setToggleGroup(roleGroup);
-        rbUser.setSelected(true); // mặc định chọn "User"
-
-        // Style chữ của radio (màu viền & nền sẽ xử lý bằng CSS riêng)
-        String radioStyle = """
-            -fx-text-fill: #B0E0E6;   /* màu chữ dịu mắt */
-            -fx-font-size: 16px;
-        """;
-        rbUser.setStyle(radioStyle);
-        rbArtist.setStyle(radioStyle);
-
-        // Gom label và 2 option lên cùng 1 dòng (HBox)
-        HBox roleRow = new HBox(20, roleLabel, rbUser, rbArtist);
-        roleRow.setAlignment(Pos.CENTER_LEFT);
-
         // === Nút Register & Return ===
         Button btnRegister = new Button("Register");
         Button btnBack = new Button("Return");
@@ -150,20 +123,27 @@ public class RegisterUI {
             String username = txtUser.getText().trim();
             String password = txtPass.getText().trim();
             String confirm = txtConfirm.getText().trim();
-            String role = ((RadioButton) roleGroup.getSelectedToggle()).getText().toLowerCase();
 
             if (username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
                 lblMessage.setStyle("-fx-text-fill: #ff6b6b;");
                 lblMessage.setText("Vui lòng nhập đầy đủ thông tin!");
-                lblMessage.setAlignment(Pos.CENTER);        // căn giữa nội dung trong label
-                lblMessage.setMaxWidth(Double.MAX_VALUE);   // label giãn toàn chiều ngang để căn giữa có hiệu lực
+                lblMessage.setStyle("-fx-font-size :16;" +
+                                    "-fx-text-fill : #19A34B;");
+                lblMessage.setAlignment(Pos.CENTER);
+                lblMessage.setMaxWidth(Double.MAX_VALUE);
 
             } else if (!password.equals(confirm)) {
-                lblMessage.setStyle("-fx-text-fill: #ff6b6b;");
+                lblMessage.setAlignment(Pos.CENTER);
+                lblMessage.setMaxWidth(Double.MAX_VALUE);
                 lblMessage.setText("Mật khẩu xác nhận không khớp!");
+                lblMessage.setStyle("-fx-font-size :16;" +
+                                    "-fx-text-fill : #19A34B;");
             } else {
-                lblMessage.setStyle("-fx-text-fill: lightgreen;");
-                lblMessage.setText("Đăng ký thành công cho user: " + username + " (" + role + ")");
+                lblMessage.setAlignment(Pos.CENTER);
+                lblMessage.setMaxWidth(Double.MAX_VALUE);
+                lblMessage.setText("Đăng ký thành công cho user: " + username);
+                lblMessage.setStyle("-fx-font-size :16;" +
+                                    "-fx-text-fill : #19A34B;");
                 // TODO: Sau này lưu DB hoặc file
             }
         });
@@ -174,13 +154,12 @@ public class RegisterUI {
             stage.setScene(loginUI.getScene(stage));
         });
 
-        // Thêm toàn bộ phần tử vào layout
+        // Thêm toàn bộ phần tử vào layout (đÃ bỏ roleRow)
         layout.getChildren().addAll(
                 lbl,
                 userName, txtUser,
                 userPass, txtPass,
                 confirmPass, txtConfirm,
-                roleRow,          // Register as + 2 lựa chọn trên cùng 1 dòng
                 btnRegister, btnBack,
                 lblMessage
         );
@@ -207,9 +186,8 @@ public class RegisterUI {
         layout.setMaxWidth(Region.USE_PREF_SIZE);
         layout.setMaxHeight(Region.USE_PREF_SIZE);
 
-        // === Tạo Scene và thêm CSS (đổi màu radio khi chọn) ===
+        // === Tạo Scene ===
         Scene scene = new Scene(registerSite, 900, 700);
-     
 
         return scene;
     }
