@@ -1,61 +1,76 @@
 package UserUI_Components;
 
-import javafx.scene.*;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 
-// 👇 thêm import HomeUI
 import Sidebar_Options.HomeUI;
+import Default.Song;
 
-// Vùng đen hiển thị nội dung trung tâm 
 public class MainDisplay extends StackPane {
 
-    private final StackPane defaultContent;
+    // Container thật chứa view; chính nó là content của ScrollPane
+    private final StackPane contentRoot = new StackPane();
+    private final Node defaultContent;
 
+    // Controller để HomeUI gọi play(song)
+    private final Song.PlayerController controller;
+
+    // --- Giữ constructor cũ (no-arg) để không vỡ chỗ gọi cũ ---
     public MainDisplay() {
+        // no-op controller: bấm bài không phát gì (để chạy UI nếu bạn chưa truyền PlayerBar)
+        this(new Song.PlayerController() {
+            @Override public void play(Song song) { /* no-op */ }
+        });
+    }
+
+    // --- Constructor chuẩn: truyền PlayerBar (implements Song.PlayerController) ---
+    public MainDisplay(Song.PlayerController controller) {
+        this.controller = controller;
+
         setPrefSize(900, 400);
-        setStyle("-fx-background-color: #010101;");
+        setStyle("-fx-background-color:#010101;");
 
+        // ===== Default content =====
         defaultContent = new StackPane(new Label("Welcome"));
-        defaultContent.setStyle("-fx-background-color: #010101;");
-        // defaultContent co giãn theo mainDisplay
-        defaultContent.prefWidthProperty().bind(widthProperty());
-        defaultContent.prefHeightProperty().bind(heightProperty());
+        ((Region) defaultContent).setStyle("-fx-background-color:#010101;");
 
-        // Hiển thị HomeUI mặc định
-        HomeUI home = new HomeUI();
+        // contentRoot không bind height để cho phép dài hơn viewport -> cuộn
+        contentRoot.setStyle("-fx-background-color:#010101;");
+        contentRoot.setMinHeight(Region.USE_PREF_SIZE);
+        contentRoot.getChildren().setAll(defaultContent);
+
+        // ===== ScrollPane bọc contentRoot =====
+        ScrollPane scroller = new ScrollPane(contentRoot);
+        scroller.setFitToWidth(true);
+        scroller.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroller.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroller.setPannable(true);
+        scroller.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0;");
+
+        // MainDisplay chỉ chứa ScrollPane
+        getChildren().setAll(scroller);
+
+        // Hiển thị HomeUI mặc định (dùng controller truyền vào)
+        HomeUI home = new HomeUI(controller);
         show(bindInto(home));
-        // getChildren().setAll(defaultContent); // (giữ lại nếu muốn fallback)
     }
 
-    // Hiển thị view mới (nếu null -> về mặc định)
+    // Hiển thị view mới; null -> quay về defaultContent.
     public void show(Node view) {
-        if (view == null) {
-            getChildren().setAll(defaultContent);
-            return;
-        }
-        getChildren().setAll(view);
+        contentRoot.getChildren().setAll(view == null ? defaultContent : view);
     }
 
-    // Quay về nội dung mặc định
-    public void showDefault() {
-        show(null);
-    }
+    // Quay về nội dung mặc định.
+    public void showDefault() { show(null); }
 
-    // Tiện ích: bind kích thước view mới với mainDisplay, nếu là Region
+    // Bind WIDTH của view với contentRoot để view ôm ngang, chiều cao để tự do cuộn.
     public <T extends Node> T bindInto(T view) {
         if (view instanceof Region r) {
-            r.prefWidthProperty().bind(widthProperty());
-            r.prefHeightProperty().bind(heightProperty());
-        } else {
-            // nếu không phải Region, bọc 1 lớp để bind
-            StackPane wrapper = new StackPane(view);
-            wrapper.prefWidthProperty().bind(widthProperty());
-            wrapper.prefHeightProperty().bind(heightProperty());
-            show(wrapper);
-            return view;
+            r.prefWidthProperty().bind(contentRoot.widthProperty());
         }
         return view;
     }
 }
-
