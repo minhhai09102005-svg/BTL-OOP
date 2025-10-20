@@ -8,27 +8,29 @@ import javafx.stage.*;
 import UserUI_Components.MainDisplay;
 import UserUI_Components.OptionSidebar;
 import UserUI_Components.PlayerBar;
-import UserUI_Components.SearchBar;  
+import UserUI_Components.SearchBar;
 
 public class UserUI {
 
     public Scene getScene(Stage primaryStage) {
-        // Trung tâm
-        MainDisplay mainDisplay = new MainDisplay();
+        // --- Tạo PlayerBar (implements Song.PlayerController) trước để truyền đi ---
+        PlayerBar playerBar = new PlayerBar(); // controller phát nhạc
 
-        // Sidebar (truyền mainDisplay để điều hướng)
-        OptionSidebar option_menu = new OptionSidebar(mainDisplay);
+        // --- Trung tâm: truyền controller vào MainDisplay  ---
+        MainDisplay mainDisplay = new MainDisplay(playerBar);
+        // Nếu MainDisplay của bạn chưa có ctor nhận controller, dùng bản no-arg cũ:
+        // MainDisplay mainDisplay = new MainDisplay();
 
-        // Player bar
-        PlayerBar playerBar = new PlayerBar();
+        // --- Sidebar: truyền cả mainDisplay + controller như chữ ký mới ---
+        OptionSidebar option_menu = new OptionSidebar(mainDisplay, playerBar);
 
-        // 2) Tạo SearchBar và cột bên phải = SearchBar + MainDisplay
+        // --- Thanh tìm kiếm + cột phải ---
         SearchBar searchBar = new SearchBar();
         VBox rightColumn = new VBox(10, searchBar, mainDisplay);
         VBox.setVgrow(mainDisplay, Priority.ALWAYS);
 
         // ===== Block 1: Sidebar + RightColumn (SearchBar + MainDisplay) =====
-        HBox block_1 = new HBox(10, option_menu, rightColumn); // <<-- 3) ĐỔI Ở ĐÂY
+        HBox block_1 = new HBox(10, option_menu, rightColumn);
         block_1.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(rightColumn, Priority.ALWAYS);
         HBox.setHgrow(mainDisplay, Priority.ALWAYS);
@@ -41,7 +43,7 @@ public class UserUI {
 
         Scene scene = new Scene(root, 1250, 700);
 
-        // ===== Resize logic (giữ như cũ) =====
+        // ===== Resize logic =====
         scene.widthProperty().addListener((obs, ov, nv) -> {
             double width = nv.doubleValue();
             double optionMenuWidth =
