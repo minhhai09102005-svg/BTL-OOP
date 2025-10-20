@@ -19,20 +19,24 @@ import javafx.animation.*;
 
 import Sidebar_Options.PlaylistUI;
 import Sidebar_Options.AlbumUI;
-import Sidebar_Options.TrendingUI;
 import Sidebar_Options.GenreUI;
 import Sidebar_Options.HomeUI;
-import Sidebar_Options.FavouriteUI;
+import Sidebar_Options.ArtistUI;
 import Default.LoginUI;
 import javafx.stage.Stage;
 
-///** Thanh options bên trái (sidebar) */
+//thêm import type controller
+import Default.Song;
+
 public class OptionSidebar extends VBox {
 
     private final MainDisplay mainDisplay;
+    private final Song.PlayerController controller; // 👈 THÊM: giữ controller để mở HomeUI
 
-    public OptionSidebar(MainDisplay mainDisplay) {
+    // nhận thêm controller (giữ nguyên các tham số còn lại)
+    public OptionSidebar(MainDisplay mainDisplay, Song.PlayerController controller) {
         this.mainDisplay = mainDisplay;
+        this.controller = controller;
 
         setPrefSize(200, 400);
         setStyle("-fx-background-color: #4A4A4A; -fx-background-radius: 10;");
@@ -40,9 +44,8 @@ public class OptionSidebar extends VBox {
         setPadding(new Insets(12));
 
         // Tiêu đề
-        Label label_1 = new Label("MusicPlayer");
+        Label label_1 = new Label("120 An Liễng");
         label_1.setStyle("-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;");
-        label_1.setTranslateX(30);
         getChildren().add(label_1);
 
         // ===== Profile (avatar tròn + nút user123) =====
@@ -51,9 +54,8 @@ public class OptionSidebar extends VBox {
 
         ImageView avatar = new ImageView();
         try {
-            Image img = new Image(getClass().getResource("/image/quỷ_sếch.jpg").toExternalForm());
+            Image img = new Image(getClass().getResource("/image/user.jpg").toExternalForm());
             avatar.setImage(img);
-            // cover: crop giữa ảnh thành vuông
             double iw = img.getWidth(), ih = img.getHeight();
             double side = Math.min(iw, ih);
             avatar.setViewport(new Rectangle2D((iw - side) / 2, (ih - side) / 2, side, side));
@@ -88,13 +90,11 @@ public class OptionSidebar extends VBox {
 
         // MỞ HomeUI vào mainDisplay
         btnHome.setOnAction(e -> {
-            HomeUI home = new HomeUI();          
-            mainDisplay.bindInto(home);           // bind size với mainDisplay
-            mainDisplay.show(home);               // hiển thị
+            HomeUI home = new HomeUI(controller);   // 👈 SỬA: truyền controller
+            mainDisplay.bindInto(home);
+            mainDisplay.show(home);
         });
-
         getChildren().add(btnHome);
-
 
         // ===== My Playlists =====
         Button btnPlaylist = mkPrimary("My Playlists");
@@ -114,14 +114,6 @@ public class OptionSidebar extends VBox {
         });
         getChildren().add(btnAlbum);
 
-        // ===== Trending =====
-        Button btnTrending = mkPrimary("Trending");
-        btnTrending.setOnAction(e -> {
-            TrendingUI view = new TrendingUI();
-            mainDisplay.bindInto(view);
-            mainDisplay.show(view);
-        });
-
         // ===== Genres =====
         Button btnGenres = mkPrimary("Genres");
         btnGenres.setOnAction(e -> {
@@ -129,44 +121,35 @@ public class OptionSidebar extends VBox {
             mainDisplay.bindInto(view);
             mainDisplay.show(view);
         });
+        getChildren().add(btnGenres);
 
-        getChildren().addAll(btnTrending, btnGenres);
-        
         // ===== Favourites =====
         Button btnFavourite = mkPrimary("Favourites");
         btnFavourite.setOnAction(e -> {
-            FavouriteUI view = new FavouriteUI();
+            ArtistUI view = new ArtistUI();
             mainDisplay.bindInto(view);
             mainDisplay.show(view);
         });
-         getChildren().add(btnFavourite);
-         
+        getChildren().add(btnFavourite);
+
         // ===== Log out =====
         Button btnLogout = mkPrimary("Log out");
-        
-        // Sự kiện: hỏi xác nhận → Yes: quay về LoginUI, No: đóng popup
         btnLogout.setOnAction(e -> {
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle("Xác nhận");
             confirm.setHeaderText(null);
             confirm.setContentText("Bạn có chắc chắn muốn đăng xuất?");
-
-            // hiển thị và lấy lựa chọn
             confirm.showAndWait().ifPresent(result -> {
                 if (result == ButtonType.OK || result == ButtonType.YES) {
-                    // Lấy Stage hiện tại từ OptionSidebar (không cần truyền primaryStage)
                     Stage stage = (Stage) getScene().getWindow();
-
-                    // Điều hướng sang LoginUI
                     LoginUI loginUI = new LoginUI();
                     stage.setScene(loginUI.getScene(stage));
-                }// Nếu NO/CANCEL: không làm gì, popup tự đóng
+                }
             });
         });
         getChildren().add(btnLogout);
     }
 
-//    /** Tạo style hover đổi màu */
     private Button mkPrimary(String text) {
         Button b = new Button(text);
         b.setPrefSize(160, 50);
