@@ -24,7 +24,6 @@ public class LoginUI {
         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 36, 0.2, 0, 12);
         """);
 
-
         Label lbl = new Label("Login");
         lbl.setStyle("-fx-font-size: 26px; -fx-text-fill: white; -fx-font-weight: bold;");
         lbl.setAlignment(Pos.CENTER);
@@ -69,7 +68,7 @@ public class LoginUI {
             -fx-prompt-text-fill: #BDBDBD;
         """);
 
-        Button btnLogin = new Button("Đăng nhập");
+        Button btnLogin = new Button("Log in");
         btnLogin.setStyle("""
             -fx-background-color: transparent;    /* nền trong suốt */
             -fx-text-fill: white;                 /* chữ trắng */
@@ -78,7 +77,7 @@ public class LoginUI {
             -fx-padding: 10 0 0 0;               /* đệm trên dưới */
             -fx-cursor : hand;
         """);
-        Button btnRegister = new Button("Đăng ký");
+        Button btnRegister = new Button("Register");
         btnRegister.setStyle("""
             -fx-background-color: transparent;    /* nền trong suốt */
             -fx-text-fill: white;                 /* chữ trắng */
@@ -95,7 +94,7 @@ public class LoginUI {
         Label lblMessage = new Label();
         lblMessage.setStyle("-fx-text-fill: red;");
 
-        // 👉 Xử lý khi bấm nút đăng nhập
+        // 👉 Xử lý khi bấm nút đăng nhập (chỉ cho phép user/123)
         btnLogin.setOnAction(e -> {
             String username = txtUser.getText().trim();
             String password = txtPass.getText().trim();
@@ -103,11 +102,12 @@ public class LoginUI {
             if (username.equals("user") && password.equals("123")) {
                 UserUI userUI = new UserUI();
                 stage.setScene(userUI.getScene(stage));
-            } else if (username.equals("artist") && password.equals("123")) {
-                ArtistUI artistUI = new ArtistUI(username);
-                stage.setScene(artistUI.getScene(stage));
             } else {
                 lblMessage.setText("Sai tên đăng nhập hoặc mật khẩu!");
+                lblMessage.setMaxWidth(Double.MAX_VALUE);
+                lblMessage.setAlignment(Pos.CENTER);
+                lblMessage.setStyle("-fx-font-size :16;" +
+                                    "-fx-text-fill : #19A34B;");
             }
         });
 
