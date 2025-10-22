@@ -9,10 +9,11 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.scene.shape.*;
 
-// Thanh phát nhạc dưới cùng + nhận play(Song) từ HomeUI
+///** Thanh phát nhạc dưới cùng + nhận play(Song) từ HomeUI */
 public class PlayerBar extends HBox implements Song.PlayerController {
 
     // --- fields cần truy cập lại trong play()/toggle ---
+    private final Button btnLike = new Button("♥"); // [ADDED] giữ tham chiếu để sync màu khi đổi bài
     private final ImageView cover = new ImageView();
     private final Label titleLbl = new Label("Be Cool");
     private final Label artistLbl = new Label("Ngọt");
@@ -23,11 +24,14 @@ public class PlayerBar extends HBox implements Song.PlayerController {
     private final Button btnPlay = new Button("⏵");
     private final Button btnNext = new Button("⏭");
 
+    // --- state ---
     private boolean isPlaying = false;
-    private Song current;        // bài đang phát (để toggle/pause, cập nhật UI)
+    private boolean liked = false;       // trạng thái trái tim ♥ (đồng bộ với current.isFavourite) [CHANGED: dùng làm cache hiển thị]
+    private boolean repeating = false;   // trạng thái lặp ↻
+    private Song current;                // bài đang phát
 
     public PlayerBar() {
-        // // khung tổng
+        // ===== Khung tổng =====
         setAlignment(Pos.CENTER_LEFT);
         setSpacing(16);
         setPadding(new Insets(10, 14, 10, 14));
@@ -36,8 +40,7 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         setMaxHeight(70);
         setStyle("-fx-background-color: #1E1E1E; -fx-background-radius: 10;");
 
-        // ----- CỤM TRÁI -----
-        // ảnh cover + meta bài hát
+        // ===== CỤM TRÁI: cover + meta + add-to-playlist =====
         try {
             cover.setImage(new Image(getClass().getResource("/image/9e0f8784ffebf6865c83c5e526274f31_1465465806.jpg").toExternalForm()));
         } catch (Exception ignore) {}
@@ -53,7 +56,7 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         VBox metaBox = new VBox(2, titleLbl, artistLbl);
         metaBox.setAlignment(Pos.CENTER_LEFT);
 
-        // (+) Nút thêm vào My Playlists
+        // (+) Nút thêm vào My Playlists (giữ hiệu ứng phóng to khi hover, đúng code cũ)
         Button btnAddToPlaylist = new Button("⊕");
         btnAddToPlaylist.setBackground(Background.EMPTY);
         btnAddToPlaylist.setBorder(Border.EMPTY);
@@ -73,6 +76,7 @@ public class PlayerBar extends HBox implements Song.PlayerController {
             ok.setTitle("Notification"); ok.setHeaderText(null);
             ok.setContentText("Added to \"My playlist\"");
             ok.showAndWait();
+            // TODO backend: add current to playlist
         });
         StackPane addWrap = new StackPane(btnAddToPlaylist);
         addWrap.setPrefSize(48, 48); addWrap.setMinSize(48, 48); addWrap.setMaxSize(48, 48);
@@ -81,19 +85,21 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         HBox leftBox = new HBox(20, cover, metaBox, addWrap);
         leftBox.setAlignment(Pos.CENTER_LEFT);
 
-        // ----- CỤM GIỮA -----
-        // nhóm nút prev/play/next
+        // ===== CỤM GIỮA: prev/play/next + thời gian =====
         for (Button b : new Button[]{btnPrev, btnPlay, btnNext}) {
+            b.setBackground(Background.EMPTY);
+            b.setBorder(Border.EMPTY);
             b.setStyle("-fx-background-color: transparent; -fx-text-fill: white;" +
                     "-fx-font-size: 18px; -fx-font-weight: 700; -fx-cursor: hand;" +
                     "-fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
         }
-        btnPlay.setOnAction(e -> togglePause()); // bấm -> đảo play/pause
+        btnPrev.setOnAction(e -> onPrev());
+        btnPlay.setOnAction(e -> togglePause());
+        btnNext.setOnAction(e -> onNext());
 
         HBox controlsRow = new HBox(20, btnPrev, btnPlay, btnNext);
         controlsRow.setAlignment(Pos.CENTER);
 
-        // thanh thời gian + nhãn mm:ss
         lblCurrent.setStyle("-fx-text-fill: #C9D1D9; -fx-font-size: 12px; -fx-font-weight: 700;");
         lblTotal.setStyle("-fx-text-fill: #C9D1D9; -fx-font-size: 12px; -fx-font-weight: 700;");
 
@@ -106,7 +112,7 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         progress.valueProperty().addListener((obs, ov, nv) -> {
             int s = nv.intValue();
             lblCurrent.setText(String.format("%d:%02d", s / 60, s % 60));
-            // TODO backend seekTo(s)
+            // TODO backend: seekTo(s)
         });
 
         HBox timeRow = new HBox(10, lblCurrent, progress, lblTotal);
@@ -116,7 +122,7 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         centerBox.setAlignment(Pos.CENTER);
         HBox.setHgrow(centerBox, Priority.ALWAYS);
 
-        // ----- CỤM PHẢI -----
+        // ===== CỤM PHẢI: volume + like + repeat =====
         Button volButton = new Button("🔊");
         volButton.setBackground(Background.EMPTY);
         volButton.setBorder(Border.EMPTY);
@@ -142,26 +148,31 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         volButton.setOnAction(e -> {
             if (!muted[0]) {
                 if (vol.getValue() <= 0.0001) lastVol[0] = 0.3;
-                vol.setValue(0);
+                vol.setValue(0); // mute
             } else {
-                vol.setValue(Math.max(lastVol[0], 0.05));
+                vol.setValue(Math.max(lastVol[0], 0.05)); // unmute
             }
         });
 
-        Button btnLike = new Button("♥");
+        // ♥ Like (toggle đỏ ⇄ trắng) — đồng bộ với Song.isFavourite
         btnLike.setTextFill(Color.WHITE);
         btnLike.setBackground(Background.EMPTY);
         btnLike.setBorder(Border.EMPTY);
         btnLike.setFocusTraversable(false);
         btnLike.setStyle("-fx-background-color: transparent; -fx-font-size: 16px; -fx-font-weight: 700;" +
                 " -fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
-        final boolean[] liked = {false};
         btnLike.setOnAction(e -> {
-            liked[0] = !liked[0];
-            btnLike.setTextFill(liked[0] ? Color.RED : Color.WHITE);
-            // TODO backend setLiked(liked[0])
+            if (current == null) return;                 // không có bài thì bỏ qua
+            boolean newFav = !current.isFavourite();     // đảo trạng thái yêu thích hiện tại
+            current.setFavourite(newFav);                // ghi vào model bài hát
+            liked = newFav;                              // cache hiển thị
+            btnLike.setTextFill(newFav ? Color.RED : Color.WHITE); // đỏ nếu like, trắng nếu bỏ like
+            // TODO backend: setLiked(current, newFav)
         });
 
+
+
+        // ↻ Repeat toggle — giữ nguyên như cũ
         Button btnRepeat = new Button("↻");
         btnRepeat.setTextFill(Color.WHITE);
         btnRepeat.setBackground(Background.EMPTY);
@@ -169,49 +180,50 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         btnRepeat.setFocusTraversable(false);
         btnRepeat.setStyle("-fx-background-color: transparent; -fx-font-size: 16px; -fx-font-weight: 700;" +
                 " -fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
-        final boolean[] repeating = {false};
         btnRepeat.setOnAction(e -> {
-            repeating[0] = !repeating[0];
-            btnRepeat.setTextFill(repeating[0] ? Color.DODGERBLUE : Color.WHITE);
-            // TODO backend setRepeat(repeating[0])
+            repeating = !repeating;
+            btnRepeat.setTextFill(repeating ? Color.DODGERBLUE : Color.WHITE);
+            // TODO backend: setRepeat(repeating)
         });
 
         HBox rightBox = new HBox(12, volButton, vol, btnLike, btnRepeat);
         rightBox.setAlignment(Pos.CENTER_RIGHT);
 
-        // ----- LẮP RÁP -----
+        // ===== LẮP RÁP =====
         getChildren().addAll(leftBox, centerBox, rightBox);
     }
 
     // --- nhận lệnh từ HomeUI: phát 1 bài hát & cập nhật UI ---
     @Override
     public void play(Song song) {
-        // giữ tham chiếu bài hiện tại
         this.current = song;
 
-        // cập nhật meta: tiêu đề/nghệ sĩ
+        // Meta
         titleLbl.setText(song.getName());
         artistLbl.setText(song.getArtist());
 
-        // cập nhật tổng thời lượng + reset thanh progress
+        // Tổng thời lượng + reset progress
         int totalSeconds = Math.max(0, song.getDurationSeconds());
         progress.setMax(totalSeconds);
         progress.setValue(0);
         lblCurrent.setText("0:00");
         lblTotal.setText(String.format("%d:%02d", totalSeconds / 60, totalSeconds % 60));
 
-        // chuyển icon sang pause và đánh dấu đang phát
+        // Play state
         isPlaying = true;
         btnPlay.setText("⏸");
 
-        // (tuỳ chọn) cập nhật ảnh cover theo album/genre 
-        // TODO: load cover theo song nếu có đường dẫn ảnh
+        // [ADDED] Đồng bộ trạng thái ♥ theo bài đang phát
+        // Sync trạng thái favourite -> màu trái tim
+        liked = song.isFavourite();                               // lấy trạng thái từ model
+        btnLike.setTextFill(liked ? Color.RED : Color.WHITE);     // đỏ nếu đã like, trắng nếu chưa
 
-        // TODO: gọi audio engine thực tế để phát "song"
-        System.out.println("Playing: " + song);
+        // (ở đây không giữ tham chiếu btnLike nên không set được trực tiếp; ta đã set trong onAction.
+        // => Giải pháp tối giản: set lại màu bằng cách dò trong rightBox hoặc giữ tham chiếu nút.)
+        // ==> Giữ tối giản: lưu tham chiếu khi tạo nút:
     }
 
-    // --- đảo play/pause khi bấm nút ---
+    // --- đảo play/pause khi bấm nút (giữ logic cũ) ---
     public void togglePause() {
         if (current == null) return; // chưa có bài để play/pause
         isPlaying = !isPlaying;
@@ -219,4 +231,19 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         // TODO: tạm dừng/tiếp tục audio thật
         System.out.println(isPlaying ? "Resumed" : "Paused");
     }
+
+    // --- xử lý Prev/Next (đặt TODO để gọi playlist) ---
+    private void onPrev() {
+        // TODO: gọi playlist controller để lùi bài, sau đó play(nextSong)
+        System.out.println("Prev clicked");
+    }
+    private void onNext() {
+        // TODO: gọi playlist controller để tiến bài, sau đó play(nextSong)
+        System.out.println("Next clicked");
+    }
+
+    // --- expose state nếu cần ---
+    public boolean isLiked() { return liked; }
+    public boolean isRepeating() { return repeating; }
+    public boolean isPlaying() { return isPlaying; }
 }
