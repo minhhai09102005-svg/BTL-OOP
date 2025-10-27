@@ -38,7 +38,7 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         setPrefHeight(70);
         setMinHeight(70);
         setMaxHeight(70);
-        setStyle("-fx-background-color: #1E1E1E; -fx-background-radius: 10;");
+        setStyle("-fx-background-color: #000000; -fx-background-radius: 10;");
 
         // ===== CỤM TRÁI: cover + meta + add-to-playlist =====
         try {
@@ -224,6 +224,7 @@ public class PlayerBar extends HBox implements Song.PlayerController {
     }
 
     // --- đảo play/pause khi bấm nút (giữ logic cũ) ---
+    @Override
     public void togglePause() {
         if (current == null) return; // chưa có bài để play/pause
         isPlaying = !isPlaying;
