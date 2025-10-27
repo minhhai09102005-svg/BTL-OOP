@@ -20,7 +20,6 @@ public class MainDisplay extends StackPane {
 
     // --- Giữ constructor cũ (no-arg) để không vỡ chỗ gọi cũ ---
     public MainDisplay() {
-        // no-op controller: bấm bài không phát gì (để chạy UI nếu bạn chưa truyền PlayerBar)
         this(new Song.PlayerController() {
             @Override public void play(Song song) { /* no-op */ }
         });
@@ -37,7 +36,7 @@ public class MainDisplay extends StackPane {
         defaultContent = new StackPane(new Label("Welcome"));
         ((Region) defaultContent).setStyle("-fx-background-color:#010101;");
 
-        // contentRoot không bind height để cho phép dài hơn viewport -> cuộn
+        // contentRoot không bind height để cho phép dài hơn viewport -> cuộn dọc
         contentRoot.setStyle("-fx-background-color:#010101;");
         contentRoot.setMinHeight(Region.USE_PREF_SIZE);
         contentRoot.getChildren().setAll(defaultContent);
@@ -49,6 +48,10 @@ public class MainDisplay extends StackPane {
         scroller.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scroller.setPannable(true);
         scroller.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0;");
+
+        // >>> Khoá bề ngang để không phát sinh thanh trượt ngang
+        contentRoot.minWidthProperty().bind(scroller.widthProperty());
+        contentRoot.maxWidthProperty().bind(scroller.widthProperty());
 
         // MainDisplay chỉ chứa ScrollPane
         getChildren().setAll(scroller);
@@ -66,10 +69,11 @@ public class MainDisplay extends StackPane {
     // Quay về nội dung mặc định.
     public void showDefault() { show(null); }
 
-    // Bind WIDTH của view với contentRoot để view ôm ngang, chiều cao để tự do cuộn.
+    // Bind WIDTH của view với contentRoot để view ôm ngang, chiều cao để tự do cuộn dọc.
     public <T extends Node> T bindInto(T view) {
         if (view instanceof Region r) {
             r.prefWidthProperty().bind(contentRoot.widthProperty());
+            r.maxWidthProperty().bind(contentRoot.widthProperty()); // <<< thêm dòng này
         }
         return view;
     }
