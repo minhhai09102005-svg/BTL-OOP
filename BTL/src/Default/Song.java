@@ -12,9 +12,10 @@ public class Song {
     private String genre;
 
     private String lyrics; // optional
-
-    //đánh dấu bài hát đã yêu thích hay chưa
-    private boolean isFavourite; 
+    // đánh dấu bài hát đã yêu thích hay chưa
+    private boolean isFavourite;
+    // [ADDED] đánh dấu bài hát đang nằm trong playlist hay chưa
+    private boolean isPlaylist;
 
     // --- Hợp đồng hành vi phát nhạc, để UI gọi mà không phụ thuộc lớp cụ thể ---
     public interface PlayerController {
@@ -36,8 +37,10 @@ public class Song {
         this.album = (album == null) ? "" : album.trim();    // null -> ""
         this.genre = (genre == null) ? "" : genre.trim();    // null -> ""
         this.lyrics = (lyrics == null || lyrics.isBlank()) ? null : lyrics.trim(); // blank -> null
-        // isFavourite mặc định là false
+
+        // mặc định
         this.isFavourite = false;
+        this.isPlaylist  = false; // [ADDED]
     }
 
     // --- getters/setters cơ bản (đã trim/validate cần thiết) ---
@@ -68,9 +71,18 @@ public class Song {
     public String getLyrics() { return lyrics; }
     public void setLyrics(String lyrics) { this.lyrics = (lyrics == null || lyrics.isBlank()) ? null : lyrics.trim(); }
 
-    // [ADDED] getter/setter cho isFavourite
+    // isFavourite
     public boolean isFavourite() { return isFavourite; }
     public void setFavourite(boolean favourite) { this.isFavourite = favourite; }
+
+    // [ADDED] isPlaylist
+        public boolean isPlaylist() {
+            return isPlaylist;
+        }
+
+        public void setPlaylist(boolean playlist) {
+            this.isPlaylist = playlist;
+        }
 
     // --- tiện ích: đổi giây -> "mm:ss" để hiển thị ---
     public String getFormattedDuration() {
