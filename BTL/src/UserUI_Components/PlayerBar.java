@@ -8,6 +8,9 @@ import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.scene.shape.*;
+import Sidebar_Options.PlaylistUI;
+import Sidebar_Options.FavouriteUI;
+
 
 ///** Thanh phát nhạc dưới cùng + nhận play(Song) từ HomeUI */
 public class PlayerBar extends HBox implements Song.PlayerController {
@@ -15,8 +18,8 @@ public class PlayerBar extends HBox implements Song.PlayerController {
     // --- fields cần truy cập lại trong play()/toggle ---
     private final Button btnLike = new Button("♥"); // [ADDED] giữ tham chiếu để sync màu khi đổi bài
     private final ImageView cover = new ImageView();
-    private final Label titleLbl = new Label("Be Cool");
-    private final Label artistLbl = new Label("Ngọt");
+    private final Label titleLbl = new Label("Song");
+    private final Label artistLbl = new Label("Artist");
     private final Label lblCurrent = new Label("0:00");
     private final Label lblTotal = new Label("0:00");
     private final Slider progress = new Slider(0, 205, 0); // range sẽ set lại khi play()
@@ -72,12 +75,13 @@ public class PlayerBar extends HBox implements Song.PlayerController {
         btnAddToPlaylist.setOnMouseEntered(e -> { btnAddToPlaylist.setScaleX(1.25); btnAddToPlaylist.setScaleY(1.25); });
         btnAddToPlaylist.setOnMouseExited(e -> { btnAddToPlaylist.setScaleX(1.0); btnAddToPlaylist.setScaleY(1.0); });
         btnAddToPlaylist.setOnAction(e -> {
-            Alert ok = new Alert(Alert.AlertType.INFORMATION);
-            ok.setTitle("Notification"); ok.setHeaderText(null);
-            ok.setContentText("Added to \"My playlist\"");
-            ok.showAndWait();
-            // TODO backend: add current to playlist
+            if (current == null) return;           // chưa có bài nào đang phát
+            if (!current.isPlaylist()) {           // chưa nằm trong playlist -> đánh dấu
+                current.setPlaylist(true);
+            }
+            PlaylistUI.add(current);               // gọi thẳng sang PlaylistUI (static)
         });
+
         StackPane addWrap = new StackPane(btnAddToPlaylist);
         addWrap.setPrefSize(48, 48); addWrap.setMinSize(48, 48); addWrap.setMaxSize(48, 48);
         addWrap.setAlignment(Pos.CENTER);
@@ -166,6 +170,7 @@ public class PlayerBar extends HBox implements Song.PlayerController {
             boolean newFav = !current.isFavourite();     // đảo trạng thái yêu thích hiện tại
             current.setFavourite(newFav);                // ghi vào model bài hát
             liked = newFav;                              // cache hiển thị
+            FavouriteUI.onFavouriteToggled(current);
             btnLike.setTextFill(newFav ? Color.RED : Color.WHITE); // đỏ nếu like, trắng nếu bỏ like
             // TODO backend: setLiked(current, newFav)
         });
