@@ -90,11 +90,11 @@ public class OptionSidebar extends VBox {
         // ===== My Playlists =====
         Button btnPlaylist = mkPrimary(" 📚 My Playlists");
         btnPlaylist.setOnAction(e -> {
-            PlaylistUI view = new PlaylistUI();
-            mainDisplay.bindInto(view);
-            mainDisplay.show(view);
+            PlaylistUI view = new PlaylistUI(controller);  // <-- truyền controller vào đây
+            mainDisplay.show(mainDisplay.bindInto(view));
         });
         getChildren().add(btnPlaylist);
+
 
         // ===== My Album =====
         Button btnAlbum = mkPrimary(" 🎵 My Album");
@@ -108,7 +108,7 @@ public class OptionSidebar extends VBox {
         // ===== Genres =====
         Button btnGenres = mkPrimary(" 💿 Genres");
         btnGenres.setOnAction(e -> {
-            GenreUI view = new GenreUI(mainDisplay);
+            GenreUI view = new GenreUI();
             mainDisplay.bindInto(view);
             mainDisplay.show(view);
         });
@@ -117,9 +117,8 @@ public class OptionSidebar extends VBox {
         // ===== Favourites =====
         Button btnFavourite = mkPrimary(" ♥ Favourites");
         btnFavourite.setOnAction(e -> {
-            FavouriteUI view = new FavouriteUI();
-            mainDisplay.bindInto(view);
-            mainDisplay.show(view);
+            FavouriteUI view = new FavouriteUI(controller);  // <-- truyền controller vào đây
+            mainDisplay.show(mainDisplay.bindInto(view));
         });
         getChildren().add(btnFavourite);
 
