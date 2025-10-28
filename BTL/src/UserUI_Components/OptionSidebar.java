@@ -108,7 +108,7 @@ public class OptionSidebar extends VBox {
         // ===== Genres =====
         Button btnGenres = mkPrimary(" 💿 Genres");
         btnGenres.setOnAction(e -> {
-            GenreUI view = new GenreUI();
+            GenreUI view = new GenreUI(mainDisplay);
             mainDisplay.bindInto(view);
             mainDisplay.show(view);
         });
