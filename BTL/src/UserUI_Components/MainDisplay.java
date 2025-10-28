@@ -36,22 +36,25 @@ public class MainDisplay extends StackPane {
         defaultContent = new StackPane(new Label("Welcome"));
         ((Region) defaultContent).setStyle("-fx-background-color:#010101;");
 
-        // contentRoot không bind height để cho phép dài hơn viewport -> cuộn dọc
         contentRoot.setStyle("-fx-background-color:#010101;");
-        contentRoot.setMinHeight(Region.USE_PREF_SIZE);
+        // ❌ BỎ ràng buộc gây hụt chiều cao: USE_PREF_SIZE
+        // contentRoot.setMinHeight(Region.USE_PREF_SIZE);
+
         contentRoot.getChildren().setAll(defaultContent);
 
         // ===== ScrollPane bọc contentRoot =====
         ScrollPane scroller = new ScrollPane(contentRoot);
         scroller.setFitToWidth(true);
+        scroller.setFitToHeight(true); // ✅ quan trọng: nội dung ngắn thì giãn tới vừa viewport
         scroller.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroller.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scroller.setPannable(true);
         scroller.setStyle("-fx-background: transparent; -fx-background-color: transparent; -fx-padding: 0;");
 
-        // >>> Khoá bề ngang để không phát sinh thanh trượt ngang
-        contentRoot.minWidthProperty().bind(scroller.widthProperty());
-        contentRoot.maxWidthProperty().bind(scroller.widthProperty());
+        // ✅ ràng buộc minHeight của contentRoot = chiều cao viewport
+        scroller.viewportBoundsProperty().addListener((obs, oldV, v) -> {
+            contentRoot.setMinHeight(v.getHeight());
+        });
 
         // MainDisplay chỉ chứa ScrollPane
         getChildren().setAll(scroller);
@@ -69,11 +72,10 @@ public class MainDisplay extends StackPane {
     // Quay về nội dung mặc định.
     public void showDefault() { show(null); }
 
-    // Bind WIDTH của view với contentRoot để view ôm ngang, chiều cao để tự do cuộn dọc.
+    // Bind WIDTH của view với contentRoot để view ôm ngang, chiều cao để tự do cuộn.
     public <T extends Node> T bindInto(T view) {
         if (view instanceof Region r) {
             r.prefWidthProperty().bind(contentRoot.widthProperty());
-            r.maxWidthProperty().bind(contentRoot.widthProperty()); // <<< thêm dòng này
         }
         return view;
     }
