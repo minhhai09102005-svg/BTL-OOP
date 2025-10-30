@@ -160,58 +160,76 @@ public class HomeUI extends StackPane {
             }
         });
 
-        // [NEW] CSS inline cho ScrollBar: ẩn ngang; dọc hẹp + “viên thuốc” xanh tươi
-        // Mục đích: Custom scrollbar bằng lookup khi skin đã tạo, tránh Null/NotFound
+        // [NEW] CSS inline cho ScrollBar (đơn giản nhất có thể, viết tường minh):
+        // - Ẩn thanh cuộn ngang hoàn toàn
+        // - Thanh dọc mỏng (8px), track trong suốt, thumb xanh, bo hình viên thuốc
         Platform.runLater(() -> {
-            // [NEW] ẨN THANH NGANG: biến mất hoàn toàn cả hiển thị lẫn layout
-            lv.lookupAll(".scroll-bar:horizontal").forEach(sb -> {
+            // 1) ẨN HOÀN TOÀN THANH NGANG
+            for (Node sb : lv.lookupAll(".scroll-bar:horizontal")) {
                 sb.setStyle(
-                    "-fx-opacity: 0;" +     // ẩn
-                    "-fx-pref-height: 0;" + // ép cao = 0
-                    "-fx-max-height: 0;" +  // giới hạn tối đa = 0
-                    "-fx-padding: 0;"       // không chừa padding
+                    "-fx-opacity: 0;" +     // không hiển thị
+                    "-fx-pref-height: 0;" + // chiều cao 0
+                    "-fx-max-height: 0;" +  // tối đa 0
+                    "-fx-padding: 0;"       // không padding
                 );
-                sb.setDisable(true);  // [NEW] vô hiệu thao tác
-                sb.setManaged(false); // [NEW] loại khỏi layout pass
-            });
+                sb.setDisable(true);   // vô hiệu tương tác
+                sb.setManaged(false);  // loại khỏi layout
+                sb.setVisible(false);  // ẩn luôn
+                sb.setPickOnBounds(false);
+            }
 
-            // [NEW] THANH DỌC: thu hẹp, nền trong suốt, đặt padding viền trong
-            lv.lookupAll(".scroll-bar:vertical").forEach(sb -> {
+            // 2) THANH DỌC: mỏng, track trong suốt, thumb xanh, bo viên thuốc
+            for (Node sb : lv.lookupAll(".scroll-bar:vertical")) {
+                // khung scrollbar dọc
                 sb.setStyle(
-                    "-fx-pref-width: 8;" +                 // chiều rộng 8px
+                    "-fx-pref-width: 8;" +                 // mỏng 8px
                     "-fx-max-width: 8;" +
-                    "-fx-background-color: transparent;" + // không nền
+                    "-fx-background-color: transparent;" + // nền trong suốt
                     "-fx-background-insets: 0;" +
                     "-fx-padding: 4 2 4 2;"               // đẩy sát mép cho gọn
                 );
 
-                // [NEW] Ẩn các nút mũi tên (nếu skin có)
-                Node inc = sb.lookup(".increment-button");
-                Node dec = sb.lookup(".decrement-button");
-                if (inc != null) inc.setStyle("-fx-opacity:0; -fx-padding:0; -fx-pref-width:0; -fx-pref-height:0; -fx-max-width:0; -fx-max-height:0;");
-                if (dec != null) dec.setStyle("-fx-opacity:0; -fx-padding:0; -fx-pref-width:0; -fx-pref-height:0; -fx-max-width:0; -fx-max-height:0;");
+                // 2.1) Ẩn 2 nút mũi tên (nếu có)
+                Node inc = ((Region) sb).lookup(".increment-button");
+                if (inc != null) {
+                    inc.setStyle(
+                        "-fx-opacity:0; -fx-padding:0;" +
+                        "-fx-pref-width:0; -fx-pref-height:0;" +
+                        "-fx-max-width:0; -fx-max-height:0;"
+                    );
+                    inc.setManaged(false);
+                }
+                Node dec = ((Region) sb).lookup(".decrement-button");
+                if (dec != null) {
+                    dec.setStyle(
+                        "-fx-opacity:0; -fx-padding:0;" +
+                        "-fx-pref-width:0; -fx-pref-height:0;" +
+                        "-fx-max-width:0; -fx-max-height:0;"
+                    );
+                    dec.setManaged(false);
+                }
 
-                // [NEW] TRACK: nền mờ, bo tròn mạnh (viên thuốc)
-                Node track = sb.lookup(".track");
+                // 2.2) TRACK (đường ray) trong suốt + bo tròn
+                Node track = ((Region) sb).lookup(".track");
                 if (track != null) {
                     track.setStyle(
-                        "-fx-background-color: rgba(255,255,255,0.06);" + // xám mờ
+                        "-fx-background-color: transparent;" + // đứng yên màu trong suốt
                         "-fx-background-insets: 0;" +
-                        "-fx-background-radius: 100;"                     // bo tròn
+                        "-fx-background-radius: 100;"          // bo hình viên thuốc
                     );
                 }
 
-                // [NEW] THUMB: màu xanh tươi, bo “viên thuốc”
-                Node thumb = sb.lookup(".thumb");
+                // 2.3) THUMB (nút trượt) xanh + bo tròn
+                Node thumb = ((Region) sb).lookup(".thumb");
                 if (thumb != null) {
                     thumb.setStyle(
                         "-fx-background-color: #22C55E;" + // xanh tươi
                         "-fx-background-insets: 0;" +
-                        "-fx-background-radius: 100;" +    // viên thuốc
+                        "-fx-background-radius: 100;" +    // bo viên thuốc
                         "-fx-padding: 0;"
                     );
                 }
-            });
+            }
         });
 
         return lv; // [OLD]
