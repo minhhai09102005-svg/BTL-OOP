@@ -8,10 +8,11 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.OverrunStyle;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+// [REMOVED IMG] bỏ import Image/ImageView/Rectangle vì không dùng ảnh nữa
+// import javafx.scene.image.Image;
+// import javafx.scene.image.ImageView;
+// import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 // [NEW] Dùng để hoãn styling scrollbar tới khi skin đã sẵn sàng
 import javafx.application.Platform;
@@ -24,7 +25,7 @@ public class HomeUI extends StackPane {
 
     // --- layout constants (px) ---
     private static final double W_IDX   = 36;   // [OLD] cột số thứ tự (#)
-    private static final double W_COVER = 40;   // [OLD] kích thước ảnh cover
+    // private static final double W_COVER = 40;   // [OLD] kích thước ảnh cover
     private static final double W_GAP   = 8;    // [OLD] khoảng cách cột trong GridPane
     private static final double W_TIME  = 64;   // [OLD] độ rộng cột thời lượng (mm:ss)
     private static final double W_ART   = 260;  // [OLD] độ rộng cố định cột Artist
@@ -97,10 +98,11 @@ public class HomeUI extends StackPane {
         Label h3 = head("Time");    // [OLD]
 
         grid.add(h0, 0, 0); // [OLD]
-        grid.add(h1, 2, 0); // [OLD]
-        grid.add(h2, 3, 0); // [OLD]
+        // [REMOVED IMG] bỏ cột cover => Title dời về cột 1 (trước đây là 2)
+        grid.add(h1, 1, 0); // [NEW]
+        grid.add(h2, 2, 0); // [OLD] (dịch sang trái 1 cột)
         GridPane.setHalignment(h3, javafx.geometry.HPos.RIGHT); // [OLD]
-        grid.add(h3, 4, 0); // [OLD]
+        grid.add(h3, 3, 0); // [OLD] (dịch sang trái 1 cột)
 
         StackPane wrap = new StackPane(grid); // [OLD]
         wrap.setPadding(new Insets(6, 10, 6, 10)); // [OLD]
@@ -160,77 +162,11 @@ public class HomeUI extends StackPane {
             }
         });
 
-        // [NEW] CSS inline cho ScrollBar (đơn giản nhất có thể, viết tường minh):
-        // - Ẩn thanh cuộn ngang hoàn toàn
-        // - Thanh dọc mỏng (8px), track trong suốt, thumb xanh, bo hình viên thuốc
-        Platform.runLater(() -> {
-            // 1) ẨN HOÀN TOÀN THANH NGANG
-            for (Node sb : lv.lookupAll(".scroll-bar:horizontal")) {
-                sb.setStyle(
-                    "-fx-opacity: 0;" +     // không hiển thị
-                    "-fx-pref-height: 0;" + // chiều cao 0
-                    "-fx-max-height: 0;" +  // tối đa 0
-                    "-fx-padding: 0;"       // không padding
-                );
-                sb.setDisable(true);   // vô hiệu tương tác
-                sb.setManaged(false);  // loại khỏi layout
-                sb.setVisible(false);  // ẩn luôn
-                sb.setPickOnBounds(false);
-            }
-
-            // 2) THANH DỌC: mỏng, track trong suốt, thumb xanh, bo viên thuốc
-            for (Node sb : lv.lookupAll(".scroll-bar:vertical")) {
-                // khung scrollbar dọc
-                sb.setStyle(
-                    "-fx-pref-width: 8;" +                 // mỏng 8px
-                    "-fx-max-width: 8;" +
-                    "-fx-background-color: transparent;" + // nền trong suốt
-                    "-fx-background-insets: 0;" +
-                    "-fx-padding: 4 2 4 2;"               // đẩy sát mép cho gọn
-                );
-
-                // 2.1) Ẩn 2 nút mũi tên (nếu có)
-                Node inc = ((Region) sb).lookup(".increment-button");
-                if (inc != null) {
-                    inc.setStyle(
-                        "-fx-opacity:0; -fx-padding:0;" +
-                        "-fx-pref-width:0; -fx-pref-height:0;" +
-                        "-fx-max-width:0; -fx-max-height:0;"
-                    );
-                    inc.setManaged(false);
-                }
-                Node dec = ((Region) sb).lookup(".decrement-button");
-                if (dec != null) {
-                    dec.setStyle(
-                        "-fx-opacity:0; -fx-padding:0;" +
-                        "-fx-pref-width:0; -fx-pref-height:0;" +
-                        "-fx-max-width:0; -fx-max-height:0;"
-                    );
-                    dec.setManaged(false);
-                }
-
-                // 2.2) TRACK (đường ray) trong suốt + bo tròn
-                Node track = ((Region) sb).lookup(".track");
-                if (track != null) {
-                    track.setStyle(
-                        "-fx-background-color: transparent;" + // đứng yên màu trong suốt
-                        "-fx-background-insets: 0;" +
-                        "-fx-background-radius: 100;"          // bo hình viên thuốc
-                    );
-                }
-
-                // 2.3) THUMB (nút trượt) xanh + bo tròn
-                Node thumb = ((Region) sb).lookup(".thumb");
-                if (thumb != null) {
-                    thumb.setStyle(
-                        "-fx-background-color: #22C55E;" + // xanh tươi
-                        "-fx-background-insets: 0;" +
-                        "-fx-background-radius: 100;" +    // bo viên thuốc
-                        "-fx-padding: 0;"
-                    );
-                }
-            }
-        });
+        // [FIX] Áp CSS cho ScrollBar và tự re-apply khi skin/scene/width thay đổi
+        restyleScrollBars(); // [ADD] gọi lần đầu sau khi ListView có children
+        lv.skinProperty().addListener((obs, oldSkin, newSkin) -> restyleScrollBars()); // [ADD] skin có thể tái tạo
+        lv.sceneProperty().addListener((obs, oldScene, newScene) -> restyleScrollBars()); // [ADD] khi attach/detach scene
+        lv.widthProperty().addListener((obs, oldW, newW) -> restyleScrollBars()); // [ADD] đảm bảo ẩn H-scroll khi đổi kích thước
 
         return lv; // [OLD]
     }
@@ -252,18 +188,9 @@ public class HomeUI extends StackPane {
         StackPane.setAlignment(idx, Pos.CENTER);
         StackPane.setAlignment(play, Pos.CENTER);
 
-        // [OLD] ảnh cover
-        ImageView cover = new ImageView();
-        try {
-            cover.setImage(new Image(getClass().getResource(
-                "/image/9e0f8784ffebf6865c83c5e526274f31_1465465806.jpg"
-            ).toExternalForm()));
-        } catch (Exception ignore) {}
-        cover.setFitWidth(W_COVER);
-        cover.setFitHeight(W_COVER);
-        Rectangle clip = new Rectangle(W_COVER, W_COVER);
-        clip.setArcWidth(8); clip.setArcHeight(8);
-        cover.setClip(clip);
+        // [REMOVED IMG] BỎ ẢNH COVER
+        // ImageView cover = new ImageView();
+        // ... (đoạn thiết lập ảnh và clip bo góc) ...
 
         // [OLD] Title co giãn + ellipsis
         Label title = new Label(song.getName());
@@ -280,14 +207,13 @@ public class HomeUI extends StackPane {
         Label time = new Label(song.getFormattedDuration());
         time.setStyle("-fx-text-fill:#C9D1D9; -fx-font-size:13px; -fx-font-weight:700;");
 
-        // [OLD] Lưới 5 cột
-        GridPane grid = baseGrid();
+        // [NEW] Lưới 4 cột (đã bỏ cover): # | title (grow) | artist fixed | time fixed
+        GridPane grid = baseGrid(); // [OLD] (định nghĩa lại bên dưới đã bỏ cột cover)
         grid.add(idxCell, 0, 0);
-        grid.add(cover,   1, 0);
-        grid.add(title,   2, 0);
-        grid.add(artist,  3, 0);
+        grid.add(title,   1, 0); // [NEW] title dời về cột 1
+        grid.add(artist,  2, 0);
         GridPane.setHalignment(time, javafx.geometry.HPos.RIGHT);
-        grid.add(time,    4, 0);
+        grid.add(time,    3, 0);
 
         // [OLD] Button bọc row (để hover/click)
         Button row = new Button();
@@ -299,9 +225,10 @@ public class HomeUI extends StackPane {
         // [OLD] Grid bám theo chiều rộng trừ padding
         grid.prefWidthProperty().bind(row.widthProperty().subtract(PAD_ROW));
 
-        // [OLD] Title = phần còn lại sau khi trừ các cột cố định + gap + padding
+        // [NEW] Title = phần còn lại sau khi trừ các cột cố định + gap + padding (không còn cover)
         grid.widthProperty().addListener((o, ov, nv) -> {
-            double fixed = W_IDX + W_COVER + W_ART + W_TIME + W_GAP * 4 + PAD_ROW;
+            // [OLD] trước đây tính với W_COVER và 5 cột => W_GAP * 4
+            double fixed = W_IDX + /* W_COVER + */ W_ART + W_TIME + W_GAP * 3 + PAD_ROW; // [NEW]
             double wTitle = Math.max(80, nv.doubleValue() - fixed);
             title.setMaxWidth(wTitle);
             title.setPrefWidth(wTitle);
@@ -323,27 +250,103 @@ public class HomeUI extends StackPane {
         return row; // [OLD]
     }
 
-    /** [OLD] 5 columns: # | cover | title (grow) | artist fixed | time fixed */
+    /** [NEW] 4 columns (đã bỏ cover): # | title (grow) | artist fixed | time fixed */
     private GridPane baseGrid() {
         GridPane g = new GridPane(); // [OLD]
         g.setHgap(W_GAP);            // [OLD]
         g.setVgap(0);                // [OLD]
         g.setAlignment(Pos.CENTER_LEFT); // [OLD]
 
-        ColumnConstraints c0 = new ColumnConstraints(W_IDX); // [OLD]
+        ColumnConstraints c0 = new ColumnConstraints(W_IDX); // [OLD] sao khi t click lại thì bị mất css thanh croll 
         c0.setHalignment(javafx.geometry.HPos.CENTER);       // [OLD]
 
-        ColumnConstraints c1 = new ColumnConstraints(W_COVER); // [OLD]
+        // [REMOVED IMG] BỎ cột cover: không còn ColumnConstraints cho cover
+        // ColumnConstraints c1 = new ColumnConstraints(W_COVER); // [OLD]
 
-        ColumnConstraints c2 = new ColumnConstraints();      // [OLD] title grows
-        c2.setHgrow(Priority.ALWAYS);                        // [OLD]
+        ColumnConstraints c1 = new ColumnConstraints();      // [NEW] title grows (cột 1)
+        c1.setHgrow(Priority.ALWAYS);                        // [OLD]
 
-        ColumnConstraints c3 = new ColumnConstraints(W_ART); // [OLD] artist fixed
+        ColumnConstraints c2 = new ColumnConstraints(W_ART); // [OLD] artist fixed (cột 2)
 
-        ColumnConstraints c4 = new ColumnConstraints(W_TIME); // [OLD]
-        c4.setHalignment(javafx.geometry.HPos.RIGHT);         // [OLD]
+        ColumnConstraints c3 = new ColumnConstraints(W_TIME); // [OLD] time fixed (cột 3)
+        c3.setHalignment(javafx.geometry.HPos.RIGHT);         // [OLD]
 
-        g.getColumnConstraints().addAll(c0, c1, c2, c3, c4);  // [OLD]
+        // [NEW] add 4 cột thay vì 5
+        g.getColumnConstraints().addAll(c0, c1, c2, c3);  // [NEW]
         return g; // [OLD]
+    }
+
+    // ===================== [FIX] Re-apply CSS cho ScrollBar khi skin/scene thay đổi =====================
+    private void restyleScrollBars() {
+        if (lv == null) return; // [ADD] an toàn khi ListView chưa sẵn sàng
+
+        Platform.runLater(() -> { // [ADD] đợi skin/render xong rồi mới lookup nodes nội bộ
+            // 1) ẨN HOÀN TOÀN THANH NGANG
+            for (Node sb : lv.lookupAll(".scroll-bar:horizontal")) {
+                sb.setStyle(
+                    "-fx-opacity: 0;" +
+                    "-fx-pref-height: 0;" +
+                    "-fx-max-height: 0;" +
+                    "-fx-padding: 0;"
+                );
+                sb.setDisable(true);    // [ADD] vô hiệu tương tác
+                sb.setManaged(false);   // [ADD] loại khỏi layout pass
+                sb.setVisible(false);   // [ADD] ẩn triệt để
+                sb.setPickOnBounds(false); // [ADD] tránh bắt sự kiện
+            }
+
+            // 2) THANH DỌC: mỏng, track trong suốt, thumb xanh, bo viên thuốc
+            for (Node sb : lv.lookupAll(".scroll-bar:vertical")) {
+                // [ADD] khung của ScrollBar dọc
+                sb.setStyle(
+                    "-fx-pref-width: 8;" +
+                    "-fx-max-width: 8;" +
+                    "-fx-background-color: transparent;" +
+                    "-fx-background-insets: 0;" +
+                    "-fx-padding: 4 2 4 2;"
+                );
+
+                // 2.1) Ẩn 2 nút mũi tên (nếu có)
+                Node inc = ((Region) sb).lookup(".increment-button");
+                if (inc != null) {
+                    inc.setStyle(
+                        "-fx-opacity:0; -fx-padding:0;" +
+                        "-fx-pref-width:0; -fx-pref-height:0;" +
+                        "-fx-max-width:0; -fx-max-height:0;"
+                    );
+                    inc.setManaged(false); // [ADD]
+                }
+                Node dec = ((Region) sb).lookup(".decrement-button");
+                if (dec != null) {
+                    dec.setStyle(
+                        "-fx-opacity:0; -fx-padding:0;" +
+                        "-fx-pref-width:0; -fx-pref-height:0;" +
+                        "-fx-max-width:0; -fx-max-height:0;"
+                    );
+                    dec.setManaged(false); // [ADD]
+                }
+
+                // 2.2) TRACK (đường ray) trong suốt + bo tròn
+                Node track = ((Region) sb).lookup(".track");
+                if (track != null) {
+                    track.setStyle(
+                        "-fx-background-color: transparent;" +
+                        "-fx-background-insets: 0;" +
+                        "-fx-background-radius: 100;"
+                    );
+                }
+
+                // 2.3) THUMB (nút trượt) xanh + bo tròn
+                Node thumb = ((Region) sb).lookup(".thumb");
+                if (thumb != null) {
+                    thumb.setStyle(
+                        "-fx-background-color: #22C55E;" + // xanh tươi
+                        "-fx-background-insets: 0;" +
+                        "-fx-background-radius: 100;" +
+                        "-fx-padding: 0;"
+                    );
+                }
+            }
+        });
     }
 }
