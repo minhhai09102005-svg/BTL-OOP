@@ -8,10 +8,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.OverrunStyle;
-// [REMOVED IMG] bỏ import Image/ImageView/Rectangle vì không dùng ảnh nữa
-// import javafx.scene.image.Image;
-// import javafx.scene.image.ImageView;
-// import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 // [NEW] Dùng để hoãn styling scrollbar tới khi skin đã sẵn sàng
@@ -335,7 +331,6 @@ public class HomeUI extends StackPane {
                         "-fx-background-radius: 100;"
                     );
                 }
-
                 // 2.3) THUMB (nút trượt) xanh + bo tròn
                 Node thumb = ((Region) sb).lookup(".thumb");
                 if (thumb != null) {
@@ -350,3 +345,4 @@ public class HomeUI extends StackPane {
         });
     }
 }
+
