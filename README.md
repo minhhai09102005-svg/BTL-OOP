@@ -159,7 +159,7 @@ mvn -N io.takari:maven:wrapper
 
 ## Tác giả
 
-PTIT Music Player Team
+120 An Liễng
 
 ## License
 
