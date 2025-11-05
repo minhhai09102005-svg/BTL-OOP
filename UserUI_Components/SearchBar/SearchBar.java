@@ -29,7 +29,7 @@ public class SearchBar extends HBox {
         setSpacing(8);
         setAlignment(Pos.CENTER_LEFT);
         setPadding(new Insets(8, 12, 8, 12));
-        setStyle("-fx-background-color:#1F2937; -fx-background-radius:8;");
+        setStyle("-fx-background-color:#000000; -fx-background-radius:8;");
 
         // Cấu hình ô nhập: placeholder, chiều cao, màu sắc
         input.setPromptText("Search songs, albums…");
