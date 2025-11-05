@@ -30,54 +30,59 @@ public class GenreUI extends StackPane {
         );
 
         // ===================== OTHER =====================
-        Button other = new Button("Other...");
-        other.setPrefSize(450, 190);
-        other.setStyle(
-            "-fx-background-color: transparent;" +           // << trong suốt
-            "-fx-background-insets: 0;" +
-            "-fx-background-radius: 20px;" +
-            "-fx-border-color: rgba(255,255,255,0.35);" +    // viền mờ để nhìn được ô
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 20px;" +
-            "-fx-text-fill: #F2F2F2;" +
-            "-fx-font-size: 20px;" +
-            "-fx-font-weight: 700;" +
-            "-fx-cursor: hand;" +
-            "-fx-padding: 8 12 8 12;"
-        );
-        other.setOnMouseEntered(e -> other.setStyle(
-            "-fx-background-color: rgba(255,255,255,0.08);" + // hover sáng nhẹ
-            "-fx-background-insets: 0;" +
-            "-fx-background-radius: 22px;" +
-            "-fx-border-color: rgba(255,255,255,0.6);" +
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 22px;" +
-            "-fx-text-fill: #FFFFFF;" +
-            "-fx-font-size: 24px;" +
-            "-fx-font-weight: 700;" +
-            "-fx-cursor: hand;" +
-            "-fx-padding: 8 12 8 12;"
-        ));
-        other.setOnMouseExited(e -> other.setStyle(
-            "-fx-background-color: transparent;" +
-            "-fx-background-insets: 0;" +
-            "-fx-background-radius: 20px;" +
-            "-fx-border-color: rgba(255,255,255,0.35);" +
-            "-fx-border-width: 1.5;" +
-            "-fx-border-radius: 20px;" +
-            "-fx-text-fill: #F2F2F2;" +
-            "-fx-font-size: 20px;" +
-            "-fx-font-weight: 700;" +
-            "-fx-cursor: hand;" +
-            "-fx-padding: 8 12 8 12;"
-        ));
-        other.setOnAction(e -> {
-            Song.PlayerController pc = mainDisplay.getPlayerController(); // hoặc: (Song.PlayerController) mainDisplay
-            SubGenreUI v = new SubGenreUI(pc, "Other");
-            mainDisplay.bindInto(v);
-            mainDisplay.show(v);
-        });
+       
+Button other = new Button("Other...");
+other.setPrefSize(450, 190);
+other.setAlignment(Pos.CENTER); // ✅ Luôn căn giữa chữ trong nút
+other.setStyle(
+    "-fx-background-color: transparent;" +
+    "-fx-background-insets: 0;" +
+    "-fx-background-radius: 20px;" +
+    "-fx-border-color: rgba(255,255,255,0.35);" +
+    "-fx-border-width: 1.5;" +
+    "-fx-border-radius: 20px;" +
+    "-fx-text-fill: #F2F2F2;" +
+    "-fx-font-size: 20px;" +
+    "-fx-font-weight: 700;" +
+    "-fx-cursor: hand;" +
+    "-fx-padding: 8 12 8 12;"
+);
 
+// ✅ Hover KHÔNG thay đổi radius, font-size, padding → không lệch
+other.setOnMouseEntered(e -> other.setStyle(
+    "-fx-background-color: rgba(255,255,255,0.1);" + // chỉ đổi màu nền
+    "-fx-background-insets: 0;" +
+    "-fx-background-radius: 20px;" +
+    "-fx-border-color: rgba(255,255,255,0.6);" +
+    "-fx-border-width: 1.5;" +
+    "-fx-border-radius: 20px;" +
+    "-fx-text-fill: #FFFFFF;" +                     // đổi màu chữ sáng hơn
+    "-fx-font-size: 20px;" +                        // ❗GIỮ NGUYÊN
+    "-fx-font-weight: 700;" +
+    "-fx-cursor: hand;" +
+    "-fx-padding: 8 12 8 12;"                      // ❗GIỮ NGUYÊN
+));
+
+other.setOnMouseExited(e -> other.setStyle(
+    "-fx-background-color: transparent;" +
+    "-fx-background-insets: 0;" +
+    "-fx-background-radius: 20px;" +
+    "-fx-border-color: rgba(255,255,255,0.35);" +
+    "-fx-border-width: 1.5;" +
+    "-fx-border-radius: 20px;" +
+    "-fx-text-fill: #F2F2F2;" +
+    "-fx-font-size: 20px;" +                       // ❗KHÔNG ĐỔI
+    "-fx-font-weight: 700;" +
+    "-fx-cursor: hand;" +
+    "-fx-padding: 8 12 8 12;"                     // ❗KHÔNG ĐỔI
+));
+
+other.setOnAction(e -> {
+    Song.PlayerController pc = mainDisplay.getPlayerController();
+    SubGenreUI v = new SubGenreUI(pc, "Other");
+    mainDisplay.bindInto(v);
+    mainDisplay.show(v);
+});
         // ===================== VPOP =====================
         Button vpop = new Button(); // [NEW] dùng graphic để chứa title + intro
         vpop.setPrefSize(450, 190);
